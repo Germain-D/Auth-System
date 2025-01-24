@@ -34,12 +34,13 @@
       </div>
       <AuthButton type="submit" size="lg" block>Se Connecter</AuthButton>
       <div id="result" class="mt-3 text-center"></div>
-      <AuthButton type="submit" size="lg" block styleName="outline" class="my-3" >Se Connecter</AuthButton>
+      <AuthButton type="submit" size="lg" block styleName="outline" class="my-3 hover:text-black" >Se Connecter</AuthButton>
       <AuthButton type="submit" size="lg" block styleName="google" class="my-3">Se Connecter avec Google</AuthButton>
       <AuthButton type="submit" size="lg" block styleName="github" class="my-3">Se Connecter avec Github</AuthButton>
       <AuthButton type="submit" size="lg" block styleName="facebook" class="my-3">Se Connecter avec Facebook</AuthButton>
       <AuthButton type="submit" size="lg" block styleName="linkedin" class="my-3">Se Connecter avec LinkedIn</AuthButton>
-      <AuthButton type="submit" size="lg" block styleName="apple" class="my-3">Se Connecter avec Apple</AuthButton>
+      <AuthButton type="submit" size="lg" block styleName="apple" class="my-3  "><span class="hover:text-black"> Se Connecter avec Apple</span></AuthButton>
+      <AuthButton type="submit" size="lg" block styleName="circle" class="my-3">Se Connecter avec Apple</AuthButton>
     </form>
   </template>
   

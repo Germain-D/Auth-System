@@ -1,4 +1,6 @@
 <script setup>
+import { Circle } from 'lucide-vue-next';
+
 const props = defineProps({
   size: {
     type: String,
@@ -25,12 +27,13 @@ const sizes = {
 
 const styles = {
   outline: "text-center border-2 border-black hover:bg-black text-black hover:text-white",
-  primary: "text-center bg-black text-white hover:bg-slate-900 border-2 border-transparent",
-  google: "text-center bg-blue-600 text-white hover:bg-blue-600 border-2 border-transparent",
-  github: "bg-black text-white hover:bg-black border-2 border-transparent flex items-center",
-  facebook: "bg-[#3b5998] text-white hover:bg-[#3b5998] border-2 border-transparent",
-  linkedin: "bg-[#0e76a8] text-white hover:bg-[#0e76a8] border-2 border-transparent",
-  apple: "bg-black text-white hover:bg-black border-2 border-transparent",
+  primary: "text-center text-white bg-black hover:bg-slate-900 border-2 border-transparent",
+  google: "text-white hover:text-black bg-blue-600 hover:bg-blue-600 border-2 border-transparent relative overflow-hidden shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:shadow-slate-600 hover:before:h-40 hover:before:w-full hover:before:bg-white",
+  github: "text-white hover:text-black bg-black hover:bg-black border-2 border-transparent relative overflow-hidden shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:shadow-slate-600 hover:before:h-40 hover:before:w-full hover:before:bg-white",
+  facebook: "text-white hover:text-black bg-[#3b5998] hover:bg-[#3b5998] border-2 border-transparent relative overflow-hidden shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:shadow-slate-600 hover:before:h-40 hover:before:w-full hover:before:bg-white",
+  linkedin: "text-white hover:text-black bg-[#0e76a8] hover:bg-[#0e76a8] border-2 border-transparent relative overflow-hidden shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:shadow-slate-600 hover:before:h-40 hover:before:w-full hover:before:bg-white",
+  apple: "text-white hover:text-blue-600 bg-black hover:bg-black border-2 border-transparent relative overflow-hidden shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:shadow-slate-600 hover:before:h-40 hover:before:w-full hover:before:bg-white",
+  circle: "text-white hover:text-black relative overflow-hidden border bg-black border-black shadow-2xl transition-all duration-500 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-white before:duration-500 before:ease-out hover:text-blue-600 hover:shadow-indigo-600 hover:before:h-40 hover:before:w-full hover:before:opacity-80",
 };
 
 
@@ -53,14 +56,16 @@ if (props.styleName === 'google') {
 <template>
   <button
     :class="[
-      'rounded transition focus-visible:ring-2 ring-offset-2 ring-gray-200 flex items-center gap-2',
+      'rounded transition focus-visible:ring-2 ring-offset-2 ring-gray-200 flex items-center gap-2 ',
       block && 'w-full',
       sizes[size],
       styles[styleName],
       className,
     ]"
   >
-    <Icon v-if="icone != 'no'" :name="'uil:'+icone" style="color: white" class="w-6 h-6" />
+    <Icon v-if="icone != 'no'" :name="'uil:'+icone" class="w-6 h-6 " />
     <span class="flex-grow text-center"><slot /></span>
   </button>
 </template>
+
+e
