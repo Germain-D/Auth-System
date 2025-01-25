@@ -1,8 +1,11 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+
 const menuitems = [
   {
-    title: "Features 1",
-    path: "#",
+    title: "Only Accessible to Authenticated Users",
+    path: "/only-authenticated",
   },
   {
     title: "Features 2",
@@ -15,6 +18,14 @@ const menuitems = [
 ];
 
 const open = ref(false);
+
+const handleLogout = async () => {
+  await authStore.logout()
+  navigateTo('/login')
+}
+
+
+
 </script>
 
 <template>
@@ -64,16 +75,24 @@ const open = ref(false);
           </li>
         </ul>
         <div class="lg:hidden flex items-center mt-3 gap-4">
-          <LandingLink href="/login" styleName="muted" block size="md"
-            >Se Connecter</LandingLink
-          >
-          <LandingLink href="/register" size="md" block>S'enregister</LandingLink>
+          <template v-if="!authStore.isLoggedIn">
+            <LandingLink href="/login" styleName="muted" block size="md">Se Connecter</LandingLink>
+            <LandingLink href="/register" size="md" block>S'enregister</LandingLink>
+          </template>
+          <template v-else>
+            <button @click="handleLogout" styleName="muted" block size="md">Se Déconnecter</button>
+          </template>
         </div>
       </nav>
       <div>
         <div class="hidden lg:flex items-center gap-4">
-          <a href="/login">Se Connecter</a>
-          <LandingLink href="/register" size="md">S'enregister</LandingLink>
+          <template v-if="!authStore.isLoggedIn">
+            <a href="/login">Se Connecter</a>
+            <LandingLink href="/register" size="md">S'enregister</LandingLink>
+          </template>
+          <template v-else>
+            <button @click="handleLogout" size="md">Se Déconnecter</button>
+          </template>
         </div>
       </div>
     </header>

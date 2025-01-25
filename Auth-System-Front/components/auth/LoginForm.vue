@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="submitForm">
+    <form @submit.prevent="handleLogin">
 
       <div class="mb-5">
         <label for="email_address" class="sr-only">Adresse Email</label
@@ -40,16 +40,31 @@
   </template>
   
   <script setup>
-  
+  import { useAuthStore } from "@/stores/auth";
+
+
   const form = ref({
     email: "",
     password: "",
   });
   
-  const result = ref("");
-  const status = ref("");
+
+  const authStore = useAuthStore();
+
+const handleLogin = async () => {
+  const success = await authStore.login({ 
+    email: form.value.email, 
+    password: form.value.password 
+  });
   
-  const submitForm = async () => {
+  if (success) {
+    navigateTo('/');
+  } else {
+    alert('Login failed');
+  }
+};
+    
+    /*
     try {
       const response = await fetch("http://localhost:8000/api/login", {
         method: "POST",
@@ -73,8 +88,10 @@
       status.value = "error";
       result.value = error.message;
       console.error(error);
-    }
-  };
+    }*/
+
+
+  
   </script>
   
   <style>
