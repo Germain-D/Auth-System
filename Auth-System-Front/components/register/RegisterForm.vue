@@ -55,6 +55,7 @@
   <script setup>
   
   const form = ref({
+    pseudo: "",
     email: "",
     password: "",
   });
@@ -64,35 +65,25 @@
   
   const submitForm = async () => {
     try {
-      status.value = "loading";
-     /* const response = await $fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: form.value,
-      });*/
-
-      console.log(response);
-      result.value = response.message;
-      if (response.status === 200) {
+        console.log(form.value); // Log for debugging, can be removed
+     
+        status.value = "loading";
+        const response = await $fetch("http://localhost:8000/api/register", {
+          method: "POST",
+          body: form.value,
+        });
+        console.log(response);
         status.value = "success";
-      } else {
-        console.log(response); // Log for debugging, can be removed
-        status.value = "error";
-      }
+        result.value = response.message;
+        if (response.status === 200) {
+          status.value = "success";
+        } else {
+          status.value = "error";
+        }
     } catch (error) {
-      console.log(error); // Log for debugging, can be removed
-      status.value = "error";
-      result.value = "Something went wrong!";
-    } finally {
-      // Reset form after submission
-      form.value.email = "";
-        form.value.password = "";
-  
-      // Clear result and status after 5 seconds
-      setTimeout(() => {
-        result.value = "";
-        status.value = "";
-      }, 5000);
-    }
+        console.log(error); // Log for debugging, can be removed
+        status.value = "error";
+        }
   };
   </script>
   

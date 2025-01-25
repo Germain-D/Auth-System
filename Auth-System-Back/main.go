@@ -2,6 +2,7 @@
 package main
 
 import (
+	"albus-auth/database"
 	"albus-auth/routes"
 	"fmt"
 
@@ -11,11 +12,11 @@ import (
 
 func main() {
 	// Connect to the database
-	/* _, err := database.ConnectDB()
-	   if err != nil {
-	       // If unable to connect, panic
-	       panic("could not connect to db")
-	   }*/
+	_, err := database.ConnectDB()
+	if err != nil {
+		// If unable to connect, panic
+		panic("could not connect to db")
+	}
 
 	// Print a success message if connection is successful
 	fmt.Println("Connection is successful")
@@ -36,7 +37,7 @@ func main() {
 	routes.SetUpRoutes(app)
 
 	// Start the server
-	err := app.Listen(":8000")
+	err = app.Listen(":8000")
 	if err != nil {
 		// If unable to start the server, panic
 		panic("could not start server")

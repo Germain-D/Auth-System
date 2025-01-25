@@ -52,7 +52,7 @@ func Register(c *fiber.Ctx) error {
 
 	// Create new user
 	user := models.User{
-		Name:     data["name"],
+		Name:     data["pseudo"],
 		Email:    data["email"],
 		Password: hashedPassword,
 	}
@@ -84,12 +84,14 @@ func Login(c *fiber.Ctx) error {
 	// Check if user exists
 	var user models.User
 	database.DB.Where("email = ?", data["email"]).First(&user)
-	if user.ID == 0 {
+	if user.ID == "" {
 		fmt.Println("User not found")
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Invalid credentials",
 		})
 	}
+
+	fmt.Println("User found")
 
 	// Compare passwords
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"]))
@@ -100,9 +102,11 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println("Password is correct")
+
 	// Generate JWT token
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": strconv.Itoa(int(user.ID)),
+		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
 	})
 	token, err := claims.SignedString([]byte(secretKey))
@@ -173,7 +177,7 @@ func SimpleLogin(c *fiber.Ctx) error {
 	}
 	c.Cookie(&cookie)
 
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Simple login successful",
 	})
 }
@@ -206,7 +210,7 @@ func User(c *fiber.Ctx) error {
 
 	// Extract user ID from claims
 	id, _ := strconv.Atoi((*claims)["sub"].(string))
-	user := models.User{ID: uint(id)}
+	user := models.User{ID: strconv.Itoa(id)}
 
 	// Query user from database using ID
 	database.DB.Where("id =?", id).First(&user)
