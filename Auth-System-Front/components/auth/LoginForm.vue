@@ -63,6 +63,7 @@
         status.value = "success";
         result.value = data.message;
         console.log(data);
+        window.location.href = "/";
       } else {
         status.value = "error";
         result.value = data.error;
