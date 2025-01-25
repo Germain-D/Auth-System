@@ -1,22 +1,16 @@
 <script setup lang="ts">
 
 definePageMeta({
-  layout: 'blank',
+  layout: 'landing',
 })
 </script>
 
 <template>
 
     <div class="grid mx-auto max-w-sm gap-6">
-      <div class="grid gap-2 text-center">
-        <h1 class="text-2xl font-semibold tracking-tight">
-          Welcome back
-        </h1>
-        <p class="text-balance text-sm text-muted-foreground">
-          Login with your Apple or Google account
-        </p>
-      </div>
-      <AuthSignIn />
+      <h1 class="text-2xl font-bold text-center">Welcome to the Auth System</h1>
+      <p class="text-center">This project serves as a template for a register/login system.</p>
+      <p class="text-center">You can use this template to quickly set up authentication in your applications.</p>
     </div>
 
 </template>
