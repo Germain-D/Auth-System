@@ -89,5 +89,6 @@ export const useAuthStore = defineStore('auth', {
 
     getError: (state) => state.error,
     isLoggedIn: (state) => state.isAuthenticated
-  }
+  },
+  persist: true,
 });

@@ -10,11 +10,11 @@ const authStore = useAuthStore();
 
 // Make it reactive with computed
 const connection_status = computed(() => authStore.isLoggedIn);
-
+console.log(connection_status.value);
 // Check auth status when component mounts
-onMounted(async () => {
+/*onMounted(async () => {
   await authStore.checkAuth();
-});
+});*/
 </script>
 
 
