@@ -1,0 +1,23 @@
+# Nuxt.js (Frontend)
+node_modules/
+.nuxt/
+dist/
+*.log
+/auth-system-front/.env
+/auth-system-front/.env.*
+
+# Golang (Backend)
+/auth-system-back/.env
+/auth-system-back/.env.*
+bin/
+obj/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+*.mod
+*.sum

@@ -5,13 +5,14 @@ go 1.20
 require (
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.32.0
+	golang.org/x/oauth2 v0.25.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
