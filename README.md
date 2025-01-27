@@ -15,6 +15,7 @@ A standardized authentication system template with Golang backend, Nuxt 3 fronte
   - Facebook
   - GitHub
   - Email/Password
+  - Not Apple because not free
 
 ## Project Structure
 
