@@ -50,7 +50,7 @@ const loginWithLinkedIn = () => {
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
-    scope: 'r_liteprofile r_emailaddress', // Scopes pour LinkedIn
+    scope: 'openid profile email', // Scopes pour LinkedIn
     state: state,
   };
 

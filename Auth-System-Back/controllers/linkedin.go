@@ -28,7 +28,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 			RedirectURL:  "http://localhost:8000/auth/linkedin/callback",
 			ClientID:     os.Getenv("LINKEDIN_CLIENT_ID"),
 			ClientSecret: os.Getenv("LINKEDIN_CLIENT_SECRET"),
-			Scopes:       []string{"r_liteprofile", "r_emailaddress"}, // Scopes pour accéder au profil et à l'email
+			Scopes:       []string{"openid", "profile", "email"}, // Scopes pour accéder au profil et à l'email
 			Endpoint:     linkedin.Endpoint,
 		}
 	)
@@ -36,6 +36,11 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	// Récupérer le code et l'état des paramètres de requête
 	code := c.Query("code")
 	state := c.Query("state")
+
+	fmt.Println("Code:", code)
+	fmt.Println("State:", state)
+	fmt.Println(linkedinOauthConfig.ClientID)
+	fmt.Println(linkedinOauthConfig.ClientSecret)
 
 	// Valider l'état (optionnel mais recommandé)
 	if state == "" {
@@ -47,6 +52,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	// Échanger le code contre un jeton d'accès
 	token, err := linkedinOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
+		fmt.Println("Token exchange error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to exchange token",
 		})
@@ -73,7 +79,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 		})
 	}
 
-	// Récupérer l'email de l'utilisateur
+	/**	// Récupérer l'email de l'utilisateur
 	emailResp, err := client.Get("https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -95,14 +101,49 @@ func LinkedInCallback(c *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println("Email Response Status:", emailResp.Status)
+	fmt.Println("Email Response Body:", emailData)
+
+	// Vérifier si l'email est disponible
+	if len(emailData.Elements) == 0 {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "No email found in LinkedIn response",
+		})
+	}
+
 	email := emailData.Elements[0].Handle.EmailAddress
+	*/
+
+	resp, err = client.Get("https://api.linkedin.com/v2/userinfo")
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch user info",
+		})
+	}
+	defer resp.Body.Close()
+
+	var userInfo struct {
+		Sub     string `json:"sub"`     // ID utilisateur
+		Name    string `json:"name"`    // Nom complet
+		Email   string `json:"email"`   // Adresse e-mail
+		Picture string `json:"picture"` // URL de la photo de profil
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to parse user info",
+		})
+	}
+
+	// Utiliser les informations de l'utilisateur
+	email := userInfo.Email
+	name := userInfo.Name
 
 	// Vérifier si l'utilisateur existe déjà dans la base de données
 	var user models.User
 	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		// Créer un nouvel utilisateur s'il n'existe pas
 		user = models.User{
-			Name:     profile.LocalizedFirstName + " " + profile.LocalizedLastName,
+			Name:     name, //profile.LocalizedFirstName + " " + profile.LocalizedLastName,
 			Email:    email,
 			Password: []byte(""), // Pas de mot de passe pour les utilisateurs LinkedIn
 		}
