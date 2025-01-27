@@ -2,6 +2,8 @@
 
 A standardized authentication system template with Golang backend, Nuxt 3 frontend, and PostgreSQL database. This template provides a modern, responsive authentication solution that works seamlessly across desktop and mobile devices.
 
+![Auth System Template](image.png)
+
 ## Features
 
 - Full-stack authentication system
@@ -21,44 +23,47 @@ A standardized authentication system template with Golang backend, Nuxt 3 fronte
 
 ```bash
 Auth-System/
-├── backend/
+├── Auth-System-Back/
 │   ├── controllers/
-│   │   ├── auth.go
-│   │   └── oauth.go
+│   │   ├── authController.go
+│   │   ├── google.go
+│   │   ├── facebook.go
+│   │   ├── linkedin.go
+│   │   └── github.go
 │   ├── database/
-│   │   ├── connection.go
-│   │   └── migrations/
+│   │   └── connection.go
 │   ├── models/
 │   │   └── user.go
 │   ├── routes/
 │   │   └── routes.go
-│   ├── middleware/
-│   │   └── jwt.go
-│   ├── config/
-│   │   └── config.go
-│   └── main.go
+│   ├── main.go
+│   └── .env
 │
-└── frontend/
+└── Auth-System-Front/
     ├── components/
-    │   ├── Auth/
+    │   ├── auth/
     │   │   ├── LoginForm.vue
-    │   │   └── RegisterForm.vue
-    │   └── Layout/
+    │   │   ├── SignIn.vue
+    │   │   └── Button.vue
+    │   └── landing/
+    │       ├── Link.vue
+    │       └── Navbar.vue
+    ├── layouts/
+    │   └── landing.vue
+    ├── middleware/
+    │   └── guard.ts
     ├── pages/
     │   ├── auth/
-    │   │   ├── login.vue
-    │   │   └── register.vue
-    │   └── index.vue
-    ├── layouts/
-    │   └── default.vue
-    ├── middleware/
-    │   └── auth.ts
+    │   │   └── callback.vue
+    │   ├── index.vue
+    │   ├── login.vue
+    │   ├── register.vue
+    │   └── only-authenticated.vue
     ├── stores/
     │   └── auth.ts
-    ├── public/
-    │   └── assets/
     ├── nuxt.config.ts
-    └── package.json
+    ├── package.json
+    └── .env
 ```
 
 ## Quick Start
