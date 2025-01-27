@@ -25,4 +25,7 @@ func SetUpRoutes(app *fiber.App) {
 
 	// github oauth
 	app.Get("/auth/github/callback", controllers.GitHubCallback)
+
+	// facebook oauth
+	app.Get("/auth/facebook/callback", controllers.FacebookCallback)
 }
