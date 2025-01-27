@@ -75,6 +75,25 @@ Auth-System/
 - PostgreSQL
 - Docker (optional)
 
+### Quick Start with Make
+
+```bash
+# Install dependencies and start servers
+make
+
+# Only install dependencies
+make install
+
+# Only start servers
+make start
+
+# Build for production
+make build
+
+# Clean project
+make clean
+```
+
 ### Backend Setup
 
 ```bash
@@ -129,6 +148,7 @@ auth-system create \
   --email \
   --name my-auth-project
   ```
+
 
 ### Contributing
 1. Fork the repository
