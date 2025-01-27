@@ -19,7 +19,7 @@ const loginWithGoogle = () => {
   // Google OAuth URL with your client ID
   const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
   const clientId = config.public.GOOGLE_CLIENT_ID;
-  const redirectUri = 'http://localhost:8000/auth/google/callback';
+  const redirectUri = 'http://localhost:8000/auth/google/callback'; //adresse de mon back-end
 
   // Generate a random state value
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

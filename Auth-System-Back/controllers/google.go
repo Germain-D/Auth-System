@@ -5,30 +5,20 @@ import (
 	"albus-auth/database"
 	"albus-auth/models"
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
-var (
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8000/auth/google/callback",
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
-		Endpoint:     google.Endpoint,
-	}
-	randomState = generateRandomString(32) // Store the state globally
-)
-
+/*
 func generateRandomString(length int) string {
 	bytes := make([]byte, length)
 	_, err := rand.Read(bytes)
@@ -36,16 +26,25 @@ func generateRandomString(length int) string {
 		panic(err) // Handle error appropriately
 	}
 	return hex.EncodeToString(bytes)
-}
-
-func HandleGoogleLogin(c *fiber.Ctx) error {
-	// Redirect to Google's OAuth consent screen
-	url := googleOauthConfig.AuthCodeURL(randomState)
-	fmt.Println("Redirecting to Google with state:", randomState) // Debug
-	return c.Redirect(url)
-}
+}*/
 
 func GoogleCallback(c *fiber.Ctx) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Erreur lors du chargement du fichier .env: %v", err)
+	}
+
+	var (
+		googleOauthConfig = &oauth2.Config{
+			RedirectURL:  "http://localhost:8000/auth/google/callback",
+			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+			Endpoint:     google.Endpoint,
+		}
+		//randomState = generateRandomString(32) // Store the state globally
+	)
+
 	// Retrieve the state and code from the query parameters
 	state := c.Query("state")
 	code := c.Query("code")
@@ -138,21 +137,8 @@ func GoogleCallback(c *fiber.Ctx) error {
 
 	fmt.Println("JWT token generated successfully")
 
-	// Set the JWT token in a cookie
-	cookie := fiber.Cookie{
-		Name:     "jwt",
-		Value:    jwtToken,
-		Expires:  time.Now().Add(time.Hour * 24), // Expires in 24 hours
-		HTTPOnly: true,
-		Secure:   true,
-	}
-	c.Cookie(&cookie)
-
-	fmt.Println("JWT token set in cookie")
-
-	// Return a success response
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Google login successful",
-		"user":    user,
-	})
+	// Rediriger vers le frontend avec le JWT dans l'URL
+	frontendURL := "http://localhost:3000/auth/callback" // Remplacez par l'URL de votre frontend
+	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
+	return c.Redirect(redirectURL, fiber.StatusFound)
 }

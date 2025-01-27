@@ -55,6 +55,10 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    clearToken() {
+      this.setToken(null);
+    },
+
     async logout() {
       try {
         await fetch('http://localhost:8000/api/logout', {
