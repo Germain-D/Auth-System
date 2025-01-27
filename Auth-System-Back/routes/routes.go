@@ -22,4 +22,7 @@ func SetUpRoutes(app *fiber.App) {
 	// linkedin oauth
 	app.Get("/auth/linkedin/callback", controllers.LinkedInCallback)
 	//app.Get("/googlelogin", controllers.HandleGoogleLogin)
+
+	// github oauth
+	app.Get("/auth/github/callback", controllers.GitHubCallback)
 }
