@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+      LINKEDIN_CLIENT_ID: process.env.LINKEDIN_CLIENT_ID,
     }
   }
 })

@@ -19,5 +19,7 @@ func SetUpRoutes(app *fiber.App) {
 	app.Post("/logout", controllers.Logout)
 	// google oauth
 	app.Get("/auth/google/callback", controllers.GoogleCallback)
+	// linkedin oauth
+	app.Get("/auth/linkedin/callback", controllers.LinkedInCallback)
 	//app.Get("/googlelogin", controllers.HandleGoogleLogin)
 }
