@@ -154,17 +154,27 @@ SECRET_KEY='secret'
 
 SIMPLE_USERNAME='admin'
 SIMPLE_PASSWORD='admin'
+
+LOG_LEVEL="debug"
 ```
 
 
 # Frontend .env
 
 ```bash
-NUXT_PUBLIC_API_BASE=http://localhost:8000
 GOOGLE_CLIENT_ID='your_client_id'
+GOOGLE_REDIRECT_URI='http://localhost:8000/auth/google/callback'
+
 LINKEDIN_CLIENT_ID='your_client_id'
+LINKEDIN_REDIRECT_URI='http://localhost:8000/auth/linkedin/callback'
+
 GITHUB_CLIENT_ID='your_client_id'
+GITHUB_REDIRECT_URI='http://localhost:8000/auth/github/callback'
+
 FACEBOOK_CLIENT_ID='your_client_id'
+FACEBOOK_REDIRECT_URI='http://localhost:8000/auth/facebook/callback'
+
+BACKEND_URL='http://localhost:8000'
 ```
 
 ### Configuration
