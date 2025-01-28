@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 // Config holds all the environment variables.
@@ -33,7 +35,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
-	DBPort     int
+	DBPort     string
 
 	// Frontend
 	FrontendURL string
@@ -52,8 +54,15 @@ type Config struct {
 	LogLevel string
 }
 
-// LoadEnv loads environment variables and returns a Config struct.
-func LoadEnv() *Config {
+func LoadConfig() (*Config, error) {
+	sugar := SugaredLogger
+
+	if err := godotenv.Load(); err != nil {
+		sugar.Warnw("Warning: .env file not found",
+			"error", err,
+		)
+	}
+
 	return &Config{
 		// Google OAuth
 		GoogleClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
@@ -80,7 +89,7 @@ func LoadEnv() *Config {
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
 		DBName:     getEnv("DB_NAME", "auth-system"),
-		DBPort:     getEnvAsInt("DB_PORT", 5432),
+		DBPort:     getEnv("DB_PORT", "5432"),
 
 		// Frontend
 		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3000"),
@@ -97,13 +106,16 @@ func LoadEnv() *Config {
 
 		//log level
 		LogLevel: getEnv("LOG_LEVEL", "info"),
-	}
+	}, nil
 }
 
-// getEnv retrieves an environment variable or returns a default value.
 func getEnv(key, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
+		SugaredLogger.Debugw("Using default value for config",
+			"key", key,
+			"default", defaultValue,
+		)
 		return defaultValue
 	}
 	return value

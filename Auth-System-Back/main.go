@@ -4,30 +4,42 @@ package main
 import (
 	"albus-auth/database"
 	"albus-auth/routes"
-	"fmt"
+	"albus-auth/utils"
 	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load environment variables
+	config, err := utils.LoadConfig()
+
+	// Initialize logger with the log level from environment variables
+	err = utils.Initialize(config.LogLevel)
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer utils.Sync()
+
+	sugar := utils.SugaredLogger
+
+	sugar.Infow("Starting application with config",
+		"DBHost", config.DBHost,
+		"DBPort", config.DBPort,
+		"FrontendURL", config.FrontendURL,
+		"ServerPort", config.ServerPort,
+	)
+
 	// Connect to the database
-	_, err := database.ConnectDB()
+	_, err = database.ConnectDB(config, sugar)
 	if err != nil {
-		// If unable to connect, panic
-		panic("could not connect to db")
+		sugar.Fatalw("Failed to connect to database",
+			"error", err,
+		)
 	}
-
-	err = godotenv.Load()
-	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier .env: %v", err)
-	}
-
-	// Print a success message if connection is successful
-	fmt.Println("Connection is successful")
+	sugar.Info("Successfully connected to database")
 
 	// Initialize Fiber app
 	app := fiber.New()
@@ -44,10 +56,10 @@ func main() {
 	// Setup routes
 	routes.SetUpRoutes(app)
 
-	// Start the server
-	err = app.Listen(os.Getenv("SERVER_PORT"))
-	if err != nil {
-		// If unable to start the server, panic
-		panic("could not start server")
+	sugar.Infof("Server starting on port%s", config.ServerPort)
+	if err := app.Listen(config.ServerPort); err != nil {
+		sugar.Fatalw("Server failed to start",
+			"error", err,
+		)
 	}
 }

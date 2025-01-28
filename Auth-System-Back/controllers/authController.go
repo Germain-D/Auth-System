@@ -5,31 +5,37 @@ package controllers
 import (
 	"albus-auth/database"
 	"albus-auth/models"
-	"fmt"
-	"log"
+	"albus-auth/utils"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
+var config, _ = utils.LoadConfig()
+
+// Initialize logger with the log level from environment variables
+var err = utils.Initialize(config.LogLevel)
+var sugar = utils.SugaredLogger
+
 // Hello returns a simple "Hello world!!" message
 func Hello(c *fiber.Ctx) error {
+	sugar.Info("Received a hello request")
 	return c.SendString("Hello world!!")
 }
 
 // controllers/authController.go
 
 func Register(c *fiber.Ctx) error {
-	fmt.Println("Received a registration request")
+	sugar.Info("Received a register request")
 
 	// Parse request body
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
+		sugar.Errorw("Failed to parse request body", "error", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Failed to parse request body",
 		})
@@ -38,6 +44,7 @@ func Register(c *fiber.Ctx) error {
 	// Check if the email already exists
 	var existingUser models.User
 	if err := database.DB.Where("email = ?", data["email"]).First(&existingUser).Error; err == nil {
+		sugar.Warnw("Email already exists", "email", data["email"])
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Email already exists",
 		})
@@ -46,6 +53,7 @@ func Register(c *fiber.Ctx) error {
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data["password"]), bcrypt.DefaultCost)
 	if err != nil {
+		sugar.Errorw("Failed to hash password", "error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to hash password",
 		})
@@ -60,11 +68,14 @@ func Register(c *fiber.Ctx) error {
 
 	// Insert user into database
 	if err := database.DB.Create(&user).Error; err != nil {
+		sugar.Errorw("Failed to create user", "error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create user",
 		})
 	}
 
+	// Return success response
+	sugar.Infow("User registered successfully", "email", data["email"])
 	return c.JSON(fiber.Map{
 		"message": "User registered successfully",
 	})
@@ -72,17 +83,13 @@ func Register(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
-	fmt.Println("Received a Login request")
-
-	//load env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	// Parse request body
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
+		sugar.Errorw("Failed to parse request body",
+			"error", err,
+		)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Failed to parse request body",
 		})
@@ -92,33 +99,39 @@ func Login(c *fiber.Ctx) error {
 	var user models.User
 	database.DB.Where("email = ?", data["email"]).First(&user)
 	if user.ID == "" {
-		fmt.Println("User not found")
+		sugar.Warnw("Login attempt failed: user not found",
+			"email", data["email"],
+		)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Invalid credentials",
 		})
 	}
 
-	fmt.Println("User found")
+	sugar.Infow("User found during login attempt",
+		"email", data["email"],
+	)
 
 	// Compare passwords
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"]))
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"]))
 	if err != nil {
-		fmt.Println("Invalid Password:", err)
+		sugar.Warnw("Login attempt failed: invalid password",
+			"email", data["email"],
+			"error", err,
+		)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Invalid credentials",
 		})
 	}
-
-	fmt.Println("Password is correct")
 
 	// Generate JWT token
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
 	})
+
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		fmt.Println("Error generating token:", err)
+		sugar.Errorw("Failed to generate token", "error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
 		})
@@ -135,22 +148,17 @@ func Login(c *fiber.Ctx) error {
 	c.Cookie(&cookie)
 
 	// Authentication successful, return success response
+	sugar.Infow("Login successful", "email", data["email"])
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"message": "Login successful",
 	})
 }
 
 func SimpleLogin(c *fiber.Ctx) error {
-	//load env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	// Hardcoded credentials
 	var (
-		knownUsername = os.Getenv("SIMPLE_USERNAME")
-		knownPassword = os.Getenv("SIMPLE_PASSWORD")
+		knownUsername = config.SimpleUsername
+		knownPassword = config.SimplePassword
 	)
 
 	// Get credentials from request body
@@ -173,6 +181,7 @@ func SimpleLogin(c *fiber.Ctx) error {
 		"sub": knownUsername,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
+
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -190,19 +199,15 @@ func SimpleLogin(c *fiber.Ctx) error {
 	}
 	c.Cookie(&cookie)
 
+	sugar.Infow("Simple login successful", "username", data["username"])
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Simple login successful",
 	})
 }
 
 func User(c *fiber.Ctx) error {
-	fmt.Println("Request to get user...")
 
-	//load env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	sugar.Info("Received a user request")
 
 	// Retrieve JWT token from cookie
 	cookie := c.Cookies("jwt")
@@ -214,6 +219,7 @@ func User(c *fiber.Ctx) error {
 
 	// Handle token parsing errors
 	if err != nil {
+		sugar.Errorw("Failed to parse token", "error", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Unauthorized",
 		})
@@ -235,11 +241,12 @@ func User(c *fiber.Ctx) error {
 	database.DB.Where("id =?", id).First(&user)
 
 	// Return user details as JSON response
+	sugar.Infow("User details retrieved successfully", "email", user.Email)
 	return c.JSON(user)
 }
 
 func Logout(c *fiber.Ctx) error {
-	fmt.Println("Received a logout request")
+	sugar.Info("Received a logout request")
 
 	// Clear JWT token by setting an empty value and expired time in the cookie
 	cookie := fiber.Cookie{

@@ -6,28 +6,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/linkedin"
 )
 
 func LinkedInCallback(c *fiber.Ctx) error {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier .env: %v", err)
-	}
-
 	var (
 		linkedinOauthConfig = &oauth2.Config{
-			RedirectURL:  os.Getenv("LINKEDIN_REDIRECT_URI"),
-			ClientID:     os.Getenv("LINKEDIN_CLIENT_ID"),
-			ClientSecret: os.Getenv("LINKEDIN_CLIENT_SECRET"),
+			RedirectURL:  config.LinkedInRedirectURI,
+			ClientID:     config.LinkedInClientID,
+			ClientSecret: config.LinkedInClientSecret,
 			Scopes:       []string{"openid", "profile", "email"}, // Scopes pour accéder au profil et à l'email
 			Endpoint:     linkedin.Endpoint,
 		}
@@ -39,6 +32,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 
 	// Valider l'état (optionnel mais recommandé)
 	if state == "" {
+		sugar.Error("Missing state parameter")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Missing state parameter",
 		})
@@ -47,7 +41,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	// Échanger le code contre un jeton d'accès
 	token, err := linkedinOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		fmt.Println("Token exchange error:", err)
+		sugar.Error("Token exchange error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to exchange token",
 		})
@@ -69,6 +63,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 		LocalizedLastName  string `json:"localizedLastName"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
+		sugar.Error("Failed to parse user info:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to parse user info",
 		})
@@ -129,5 +124,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	// Rediriger vers le frontend avec le JWT
 	frontendURL := os.Getenv("FRONTEND_URL") + "/auth/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
+
+	sugar.Infow("User logged in via LinkedIn", "email", user.Email)
 	return c.Redirect(redirectURL, fiber.StatusFound)
 }

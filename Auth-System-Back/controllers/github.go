@@ -6,28 +6,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )
 
 func GitHubCallback(c *fiber.Ctx) error {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier .env: %v", err)
-	}
 
 	var (
 		githubOauthConfig = &oauth2.Config{
-			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URI"),
-			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
-			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+			RedirectURL:  config.GitHubRedirectURI,
+			ClientID:     config.GitHubClientID,
+			ClientSecret: config.GitHubClientSecret,
 			Scopes:       []string{"user:email"}, // Scopes pour accéder à l'e-mail de l'utilisateur
 			Endpoint:     github.Endpoint,
 		}
@@ -39,6 +33,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 
 	// Valider l'état (optionnel mais recommandé)
 	if state == "" {
+		sugar.Error("Missing state parameter")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Missing state parameter",
 		})
@@ -47,6 +42,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 	// Échanger le code contre un jeton d'accès
 	token, err := githubOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
+		sugar.Error("Token exchange error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to exchange token",
 		})
@@ -56,6 +52,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 	client := githubOauthConfig.Client(context.Background(), token)
 	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
+		sugar.Error("Failed to fetch user info:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch user info",
 		})
@@ -69,6 +66,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 		Email string `json:"email"` // E-mail (peut être null)
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
+		sugar.Error("Failed to parse user info:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to parse user info",
 		})
@@ -115,6 +113,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 
 		// Insérer le nouvel utilisateur dans la base de données
 		if err := database.DB.Create(&user).Error; err != nil {
+			sugar.Error("Failed to create user:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to create user",
 			})
@@ -128,6 +127,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 	})
 	jwtToken, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
+		sugar.Error("Failed to generate token:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
 		})
@@ -136,5 +136,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 	// Rediriger vers le frontend avec le JWT
 	frontendURL := os.Getenv("FRONTEND_URL") + "/auth/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
+
+	sugar.Info("User logged in via GitHub:", user.Email)
 	return c.Redirect(redirectURL, fiber.StatusFound)
 }

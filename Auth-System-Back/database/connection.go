@@ -5,11 +5,10 @@ package database
 // Import GORM and PostgreSQL driver
 import (
 	"albus-auth/models"
+	"albus-auth/utils"
 	"fmt"
-	"log"
-	"os"
 
-	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,21 +16,14 @@ import (
 var DB *gorm.DB
 
 // Connect to PostgreSQL database
-func ConnectDB() (*gorm.DB, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Erreur lors du chargement du fichier .env: %v", err)
-	}
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_USER := os.Getenv("DB_USER")
-	DB_PASSWORD := os.Getenv("DB_PASSWORD")
-	DB_NAME := os.Getenv("DB_NAME")
-	DB_PORT := os.Getenv("DB_PORT")
+func ConnectDB(config *utils.Config, sugar *zap.SugaredLogger) (*gorm.DB, error) {
+
+	sugar.Debug("Connecting to database")
 
 	// PostgreSQL connection string format
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
 
-	fmt.Println("Connecting to database...")
+	sugar.Infof("Connecting to database: %s", dsn)
 
 	// Connect to PostgreSQL database
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

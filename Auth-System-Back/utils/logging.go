@@ -7,7 +7,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logger *zap.Logger
+var (
+	Logger        *zap.Logger
+	SugaredLogger *zap.SugaredLogger
+)
 
 // Initialize sets up the Zap logger with the specified log level.
 func Initialize(logLevel string) error {
@@ -27,6 +30,9 @@ func Initialize(logLevel string) error {
 	core := zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), atomicLevel)
 	Logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
+	// Initialize SugaredLogger
+	SugaredLogger = Logger.Sugar()
+
 	// Replace the global logger
 	zap.ReplaceGlobals(Logger)
 
@@ -36,4 +42,5 @@ func Initialize(logLevel string) error {
 // Sync flushes any buffered log entries.
 func Sync() {
 	_ = Logger.Sync()
+	_ = SugaredLogger.Sync()
 }
