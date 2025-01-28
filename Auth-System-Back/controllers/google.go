@@ -18,16 +18,6 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-/*
-func generateRandomString(length int) string {
-	bytes := make([]byte, length)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		panic(err) // Handle error appropriately
-	}
-	return hex.EncodeToString(bytes)
-}*/
-
 func GoogleCallback(c *fiber.Ctx) error {
 	err := godotenv.Load()
 	if err != nil {
@@ -36,21 +26,17 @@ func GoogleCallback(c *fiber.Ctx) error {
 
 	var (
 		googleOauthConfig = &oauth2.Config{
-			RedirectURL:  "http://localhost:8000/auth/google/callback",
+			RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URI"),
 			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 			Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 			Endpoint:     google.Endpoint,
 		}
-		//randomState = generateRandomString(32) // Store the state globally
 	)
 
 	// Retrieve the state and code from the query parameters
 	state := c.Query("state")
 	code := c.Query("code")
-
-	fmt.Println("State:", state)
-	fmt.Println("Code:", code)
 
 	// Validate the state
 	if state == "" {
@@ -58,9 +44,6 @@ func GoogleCallback(c *fiber.Ctx) error {
 			"error": "Missing state parameter",
 		})
 	}
-
-	fmt.Println(googleOauthConfig.ClientID)
-	fmt.Println(googleOauthConfig.ClientSecret)
 
 	// Exchange the authorization code for an access token
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
@@ -99,9 +82,6 @@ func GoogleCallback(c *fiber.Ctx) error {
 	email := userInfo["email"].(string)
 	name := userInfo["name"].(string)
 
-	fmt.Println("Email:", email)
-	fmt.Println("Name:", name)
-
 	// Check if the user already exists in the database
 	var user models.User
 	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
@@ -128,7 +108,7 @@ func GoogleCallback(c *fiber.Ctx) error {
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
 	})
-	jwtToken, err := claims.SignedString([]byte(secretKey))
+	jwtToken, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
@@ -138,7 +118,7 @@ func GoogleCallback(c *fiber.Ctx) error {
 	fmt.Println("JWT token generated successfully")
 
 	// Rediriger vers le frontend avec le JWT dans l'URL
-	frontendURL := "http://localhost:3000/auth/callback" // Remplacez par l'URL de votre frontend
+	frontendURL := os.Getenv("FRONTEND_URL") + "/auth/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
 	return c.Redirect(redirectURL, fiber.StatusFound)
 }

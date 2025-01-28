@@ -25,7 +25,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 
 	var (
 		linkedinOauthConfig = &oauth2.Config{
-			RedirectURL:  "http://localhost:8000/auth/linkedin/callback",
+			RedirectURL:  os.Getenv("LINKEDIN_REDIRECT_URI"),
 			ClientID:     os.Getenv("LINKEDIN_CLIENT_ID"),
 			ClientSecret: os.Getenv("LINKEDIN_CLIENT_SECRET"),
 			Scopes:       []string{"openid", "profile", "email"}, // Scopes pour accéder au profil et à l'email
@@ -36,11 +36,6 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	// Récupérer le code et l'état des paramètres de requête
 	code := c.Query("code")
 	state := c.Query("state")
-
-	fmt.Println("Code:", code)
-	fmt.Println("State:", state)
-	fmt.Println(linkedinOauthConfig.ClientID)
-	fmt.Println(linkedinOauthConfig.ClientSecret)
 
 	// Valider l'état (optionnel mais recommandé)
 	if state == "" {
@@ -79,41 +74,6 @@ func LinkedInCallback(c *fiber.Ctx) error {
 		})
 	}
 
-	/**	// Récupérer l'email de l'utilisateur
-	emailResp, err := client.Get("https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to fetch email",
-		})
-	}
-	defer emailResp.Body.Close()
-
-	var emailData struct {
-		Elements []struct {
-			Handle struct {
-				EmailAddress string `json:"emailAddress"`
-			} `json:"handle~"`
-		} `json:"elements"`
-	}
-	if err := json.NewDecoder(emailResp.Body).Decode(&emailData); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to parse email",
-		})
-	}
-
-	fmt.Println("Email Response Status:", emailResp.Status)
-	fmt.Println("Email Response Body:", emailData)
-
-	// Vérifier si l'email est disponible
-	if len(emailData.Elements) == 0 {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "No email found in LinkedIn response",
-		})
-	}
-
-	email := emailData.Elements[0].Handle.EmailAddress
-	*/
-
 	resp, err = client.Get("https://api.linkedin.com/v2/userinfo")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -143,7 +103,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		// Créer un nouvel utilisateur s'il n'existe pas
 		user = models.User{
-			Name:     name, //profile.LocalizedFirstName + " " + profile.LocalizedLastName,
+			Name:     name,
 			Email:    email,
 			Password: []byte(""), // Pas de mot de passe pour les utilisateurs LinkedIn
 		}
@@ -159,7 +119,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expire dans 24 heures
 	})
-	jwtToken, err := claims.SignedString([]byte(secretKey))
+	jwtToken, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
@@ -167,7 +127,7 @@ func LinkedInCallback(c *fiber.Ctx) error {
 	}
 
 	// Rediriger vers le frontend avec le JWT
-	frontendURL := "http://localhost:3000/auth/callback" // URL de votre frontend
+	frontendURL := os.Getenv("FRONTEND_URL") + "/auth/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
 	return c.Redirect(redirectURL, fiber.StatusFound)
 }

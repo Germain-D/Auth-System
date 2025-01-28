@@ -1,6 +1,17 @@
 <script setup>
 definePageMeta({
-  middleware: ['guard']
+  middleware: ['guard'],
+  layout: 'landing',
+})
+
+useHead({
+  title: 'Auth System',
+  meta: [
+    {
+      name: 'description',
+      content: 'A template for a register/login system.',
+    },
+  ],
 })
 
 import { useAuthStore } from '@/stores/auth'

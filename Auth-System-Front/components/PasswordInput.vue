@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ComponentFieldBindingObject } from 'vee-validate'
 import type { HTMLAttributes } from 'vue'
-import { cn } from '~/lib/utils'
+
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -21,7 +21,7 @@ const showPassword = ref(false)
     <Input
       v-model="showModal"
       :type="showPassword ? 'text' : 'password'"
-      :class="cn('pr-10', props?.class)"
+     
       placeholder="Enter your password"
       :disabled="props?.disabled"
       :autocomplete="props?.autocomplete"

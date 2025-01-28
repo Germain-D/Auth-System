@@ -64,32 +64,6 @@ const handleLogin = async () => {
   }
 };
     
-    /*
-    try {
-      const response = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form.value),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        status.value = "success";
-        result.value = data.message;
-        console.log(data);
-        window.location.href = "/";
-      } else {
-        status.value = "error";
-        result.value = data.error;
-        console.log(data);
-      }
-    } catch (error) {
-      status.value = "error";
-      result.value = error.message;
-      console.error(error);
-    }*/
-
 
   
   </script>

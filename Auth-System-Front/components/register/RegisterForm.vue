@@ -59,6 +59,8 @@
     email: "",
     password: "",
   });
+
+  const config = useRuntimeConfig()
   
   const result = ref("");
   const status = ref("");
@@ -68,7 +70,7 @@
         console.log(form.value); // Log for debugging, can be removed
      
         status.value = "loading";
-        const response = await $fetch("http://localhost:8000/api/register", {
+        const response = await $fetch(config.public.BACKEND_URL+"/api/register", {
           method: "POST",
           body: form.value,
         });

@@ -3,6 +3,16 @@ definePageMeta({
   layout: 'landing',
 })
 
+useHead({
+  title: 'Auth System',
+  meta: [
+    {
+      name: 'description',
+      content: 'A template for a register/login system.',
+    },
+  ],
+})
+
 import { useAuthStore } from "@/stores/auth";
 import { computed, onMounted } from 'vue';
 
@@ -11,10 +21,6 @@ const authStore = useAuthStore();
 // Make it reactive with computed
 const connection_status = computed(() => authStore.isLoggedIn);
 console.log(connection_status.value);
-// Check auth status when component mounts
-/*onMounted(async () => {
-  await authStore.checkAuth();
-});*/
 </script>
 
 

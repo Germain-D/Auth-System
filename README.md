@@ -124,18 +124,47 @@ Create a .env file in both frontend and backend directories:
 # Backend .env
 
 ```bash
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_NAME=auth_system
-JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID='your_client_id'
+GOOGLE_CLIENT_SECRET='your_client_secret'
+GOOGLE_REDIRECT_URI='your_backend_authorized_uri' (example: 'http://localhost:8000/auth/google/callback')
+
+LINKEDIN_CLIENT_ID='your_client_id'
+LINKEDIN_CLIENT_SECRET='your_client_secret'
+LINKEDIN_REDIRECT_URI='your_backend_authorized_uri' (example: 'http://localhost:8000/auth/linkedin/callback')
+
+GITHUB_CLIENT_ID='your_client_id'
+GITHUB_CLIENT_SECRET='your_client_secret'
+GITHUB_REDIRECT_URI='your_backend_authorized_uri' (example: 'http://localhost:8000/auth/github/callback')
+
+FACEBOOK_CLIENT_ID='your_client_id'
+FACEBOOK_CLIENT_SECRET='your_client_secret'
+FACEBOOK_REDIRECT_URI='your_backend_authorized_uri' (example: 'http://localhost:8000/auth/facebook/callback')
+
+DB_HOST='localhost'
+DB_USER='postgres'
+DB_PASSWORD='admin'
+DB_NAME='auth-system'
+DB_PORT='5432'
+
+FRONTEND_URL='http://localhost:3000'
+
+SERVER_PORT=':8000'
+
+SECRET_KEY='secret'
+
+SIMPLE_USERNAME='admin'
+SIMPLE_PASSWORD='admin'
 ```
+
 
 # Frontend .env
 
 ```bash
 NUXT_PUBLIC_API_BASE=http://localhost:8000
+GOOGLE_CLIENT_ID='your_client_id'
+LINKEDIN_CLIENT_ID='your_client_id'
+GITHUB_CLIENT_ID='your_client_id'
+FACEBOOK_CLIENT_ID='your_client_id'
 ```
 
 ### Configuration

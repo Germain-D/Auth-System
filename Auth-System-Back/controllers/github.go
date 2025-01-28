@@ -25,7 +25,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 
 	var (
 		githubOauthConfig = &oauth2.Config{
-			RedirectURL:  "http://localhost:8000/auth/github/callback",
+			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URI"),
 			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 			Scopes:       []string{"user:email"}, // Scopes pour accéder à l'e-mail de l'utilisateur
@@ -126,7 +126,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expire dans 24 heures
 	})
-	jwtToken, err := claims.SignedString([]byte(secretKey))
+	jwtToken, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
@@ -134,7 +134,7 @@ func GitHubCallback(c *fiber.Ctx) error {
 	}
 
 	// Rediriger vers le frontend avec le JWT
-	frontendURL := "http://localhost:3000/auth/callback" // URL de votre frontend
+	frontendURL := os.Getenv("FRONTEND_URL") + "/auth/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s", frontendURL, jwtToken)
 	return c.Redirect(redirectURL, fiber.StatusFound)
 }

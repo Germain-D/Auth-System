@@ -23,7 +23,7 @@ const loginWithGoogle = () => {
   // Google OAuth URL with your client ID
   const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
   const clientId = config.public.GOOGLE_CLIENT_ID;
-  const redirectUri = 'http://localhost:8000/auth/google/callback'; //adresse de mon back-end
+  const redirectUri = config.public.GOOGLE_REDIRECT_URI; // URL de votre backend
 
   // Generate a random state value
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -45,7 +45,7 @@ const loginWithGoogle = () => {
 const loginWithLinkedIn = () => {
   const linkedinAuthUrl = 'https://www.linkedin.com/oauth/v2/authorization';
   const clientId = config.public.LINKEDIN_CLIENT_ID;
-  const redirectUri = 'http://localhost:8000/auth/linkedin/callback'; // URL de votre backend
+  const redirectUri = config.public.LINKEDIN_REDIRECT_URI; // URL de votre backend
 
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -65,7 +65,7 @@ const loginWithLinkedIn = () => {
 const loginWithGitHub = () => {
   const githubAuthUrl = 'https://github.com/login/oauth/authorize';
   const clientId = config.public.GITHUB_CLIENT_ID;
-  const redirectUri = 'http://localhost:8000/auth/github/callback'; // URL de votre backend
+  const redirectUri = config.public.GITHUB_REDIRECT_URI; // URL de votre backend
 
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -84,7 +84,7 @@ const loginWithGitHub = () => {
 const loginWithFacebook = () => {
   const facebookAuthUrl = 'https://www.facebook.com/v12.0/dialog/oauth';
   const clientId = config.public.FACEBOOK_CLIENT_ID;
-  const redirectUri = 'http://localhost:8000/auth/facebook/callback'; // URL de votre backend
+  const redirectUri = config.public.FACEBOOK_REDIRECT_URI; // URL de votre backend
 
   const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 

@@ -6,15 +6,16 @@ import (
 	"albus-auth/database"
 	"albus-auth/models"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
-
-const secretKey = "secret"
 
 // Hello returns a simple "Hello world!!" message
 func Hello(c *fiber.Ctx) error {
@@ -73,6 +74,12 @@ func Register(c *fiber.Ctx) error {
 func Login(c *fiber.Ctx) error {
 	fmt.Println("Received a Login request")
 
+	//load env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// Parse request body
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
@@ -94,7 +101,7 @@ func Login(c *fiber.Ctx) error {
 	fmt.Println("User found")
 
 	// Compare passwords
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"]))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data["password"]))
 	if err != nil {
 		fmt.Println("Invalid Password:", err)
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -109,7 +116,7 @@ func Login(c *fiber.Ctx) error {
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
 	})
-	token, err := claims.SignedString([]byte(secretKey))
+	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		fmt.Println("Error generating token:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -134,10 +141,16 @@ func Login(c *fiber.Ctx) error {
 }
 
 func SimpleLogin(c *fiber.Ctx) error {
+	//load env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// Hardcoded credentials
-	const (
-		knownUsername = "admin"
-		knownPassword = "password123"
+	var (
+		knownUsername = os.Getenv("SIMPLE_USERNAME")
+		knownPassword = os.Getenv("SIMPLE_PASSWORD")
 	)
 
 	// Get credentials from request body
@@ -160,7 +173,7 @@ func SimpleLogin(c *fiber.Ctx) error {
 		"sub": knownUsername,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
-	token, err := claims.SignedString([]byte(secretKey))
+	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to generate token",
@@ -185,12 +198,18 @@ func SimpleLogin(c *fiber.Ctx) error {
 func User(c *fiber.Ctx) error {
 	fmt.Println("Request to get user...")
 
+	//load env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// Retrieve JWT token from cookie
 	cookie := c.Cookies("jwt")
 
 	// Parse JWT token with claims
 	token, err := jwt.ParseWithClaims(cookie, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
+		return []byte(os.Getenv("SECRET_KEY")), nil
 	})
 
 	// Handle token parsing errors

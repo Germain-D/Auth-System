@@ -3,6 +3,16 @@
 definePageMeta({
   layout: 'landing',
 })
+
+useHead({
+  title: 'Auth System',
+  meta: [
+    {
+      name: 'description',
+      content: 'A template for a register/login system.',
+    },
+  ],
+})
 </script>
 
 <template>
