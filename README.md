@@ -1,4 +1,5 @@
 ![Work in Progress](https://img.shields.io/badge/status-work%20in%20progress-orange)
+![Version](https://img.shields.io/badge/version-0.0.1-blue)
 # Auth System Template
 
 A standardized authentication system template with Golang backend, Nuxt 3 frontend, and PostgreSQL database. This template provides a modern, responsive authentication solution that works seamlessly across desktop and mobile devices.
